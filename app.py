@@ -15,7 +15,7 @@ def autenticar():
             if usuario == "umf" and senha == "umfers":
                 st.session_state['autenticado'] = True
                 st.success("Autenticado com sucesso!")
-                st.experimental_rerun()  # Recarrega o aplicativo
+                st.rerun()  # Recarrega o aplicativo
             else:
                 st.error("Usuário ou senha incorretos.")
     else:
