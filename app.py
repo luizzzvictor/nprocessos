@@ -1,9 +1,7 @@
 import re
-
 import docx2txt
 import PyPDF2
 import streamlit as st
-
 
 # Função para autenticação simples
 def autenticar():
@@ -54,47 +52,51 @@ def main():
     autenticar()
 
     if st.session_state.get("autenticado"):
-        arquivos = st.file_uploader(
-            "Faça upload de PDFs ou DOCXs",
-            type=["pdf", "docx"],
-            accept_multiple_files=True,
-        )
+        # Cria a aba "N.Processos"
+        tab_n_processos, = st.tabs(["N.Processos"])
 
-        if arquivos:
-            for arquivo in arquivos:
-                st.subheader(f"Resultados para {arquivo.name}")
-                if arquivo.type == "application/pdf":
-                    texto_por_pagina = extrair_texto_pdf(arquivo)
-                    numeros_encontrados = {}
-                    for num_pagina, texto in texto_por_pagina:
+        with tab_n_processos:
+            arquivos = st.file_uploader(
+                "Faça upload de PDFs ou DOCXs",
+                type=["pdf", "docx"],
+                accept_multiple_files=True,
+            )
+
+            if arquivos:
+                for arquivo in arquivos:
+                    st.subheader(f"Resultados para {arquivo.name}")
+                    if arquivo.type == "application/pdf":
+                        texto_por_pagina = extrair_texto_pdf(arquivo)
+                        numeros_encontrados = {}
+                        for num_pagina, texto in texto_por_pagina:
+                            resultados = buscar_padroes(texto)
+                            for numero in resultados:
+                                if numero not in numeros_encontrados:
+                                    numeros_encontrados[numero] = []
+                                numeros_encontrados[numero].append(num_pagina)
+                        if numeros_encontrados:
+                            st.write("Numerações únicas encontradas:")
+                            for numero, paginas in numeros_encontrados.items():
+                                paginas_unicas = sorted(set(paginas))
+                                paginas_str = ", ".join(map(str, paginas_unicas))
+                                st.write(f"- {numero} (Página(s): {paginas_str})")
+                        else:
+                            st.write("Nenhuma numeração única encontrada.")
+                    elif (
+                        arquivo.type
+                        == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    ):
+                        texto = extrair_texto_docx(arquivo)
                         resultados = buscar_padroes(texto)
-                        for numero in resultados:
-                            if numero not in numeros_encontrados:
-                                numeros_encontrados[numero] = []
-                            numeros_encontrados[numero].append(num_pagina)
-                    if numeros_encontrados:
-                        st.write("Numerações únicas encontradas:")
-                        for numero, paginas in numeros_encontrados.items():
-                            paginas_unicas = sorted(set(paginas))
-                            paginas_str = ", ".join(map(str, paginas_unicas))
-                            st.write(f"- {numero} (Página(s): {paginas_str})")
+                        if resultados:
+                            st.write("Numerações encontradas:")
+                            for resultado in resultados:
+                                st.write(f"- {resultado}")
+                        else:
+                            st.write("Nenhuma numeração encontrada.")
                     else:
-                        st.write("Nenhuma numeração única encontrada.")
-                elif (
-                    arquivo.type
-                    == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                ):
-                    texto = extrair_texto_docx(arquivo)
-                    resultados = buscar_padroes(texto)
-                    if resultados:
-                        st.write("Numerações encontradas:")
-                        for resultado in resultados:
-                            st.write(f"- {resultado}")
-                    else:
-                        st.write("Nenhuma numeração encontrada.")
-                else:
-                    st.error("Tipo de arquivo não suportado.")
-                    continue
+                        st.error("Tipo de arquivo não suportado.")
+                        continue
     else:
         st.warning("Por favor, faça o login para continuar.")
 
