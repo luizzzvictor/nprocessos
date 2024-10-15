@@ -14,12 +14,11 @@ def autenticar():
         if st.button("Login"):
             if usuario == "umf" and senha == "umfers":
                 st.session_state["autenticado"] = True
-                st.success("Autenticado com sucesso!")
+                
                 st.rerun()  # Recarrega o aplicativo
             else:
                 st.error("Usuário ou senha incorretos.")
-    else:
-        st.success("Autenticado com sucesso!")
+    
 
 
 # Função para extrair texto de PDFs por página
