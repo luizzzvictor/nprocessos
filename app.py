@@ -1,25 +1,28 @@
-import streamlit as st
 import re
-import PyPDF2
+
 import docx2txt
+import PyPDF2
+import streamlit as st
+
 
 # Função para autenticação simples
 def autenticar():
-    if 'autenticado' not in st.session_state:
-        st.session_state['autenticado'] = False
+    if "autenticado" not in st.session_state:
+        st.session_state["autenticado"] = False
 
-    if not st.session_state['autenticado']:
+    if not st.session_state["autenticado"]:
         usuario = st.text_input("Usuário")
         senha = st.text_input("Senha", type="password")
         if st.button("Login"):
             if usuario == "umf" and senha == "umfers":
-                st.session_state['autenticado'] = True
+                st.session_state["autenticado"] = True
                 st.success("Autenticado com sucesso!")
                 st.rerun()  # Recarrega o aplicativo
             else:
                 st.error("Usuário ou senha incorretos.")
     else:
         st.success("Autenticado com sucesso!")
+
 
 # Função para extrair texto de PDFs por página
 def extrair_texto_pdf(arquivo_pdf):
@@ -30,10 +33,12 @@ def extrair_texto_pdf(arquivo_pdf):
         texto_por_pagina.append((num_pagina, texto))
     return texto_por_pagina
 
+
 # Função para extrair texto de DOCX
 def extrair_texto_docx(arquivo_docx):
     texto = docx2txt.process(arquivo_docx)
     return texto
+
 
 # Função para buscar padrões no texto
 def buscar_padroes(texto):
@@ -42,13 +47,18 @@ def buscar_padroes(texto):
     resultados_unicos = set(resultados)  # Obter valores únicos
     return resultados_unicos
 
+
 def main():
     st.title("UMFtools")
 
     autenticar()
 
-    if st.session_state.get('autenticado'):
-        arquivos = st.file_uploader("Faça upload de PDFs ou DOCXs", type=["pdf", "docx"], accept_multiple_files=True)
+    if st.session_state.get("autenticado"):
+        arquivos = st.file_uploader(
+            "Faça upload de PDFs ou DOCXs",
+            type=["pdf", "docx"],
+            accept_multiple_files=True,
+        )
 
         if arquivos:
             for arquivo in arquivos:
@@ -63,14 +73,17 @@ def main():
                                 numeros_encontrados[numero] = []
                             numeros_encontrados[numero].append(num_pagina)
                     if numeros_encontrados:
-                        st.write("Numerações encontradas:")
+                        st.write("Numerações únicas encontradas:")
                         for numero, paginas in numeros_encontrados.items():
                             paginas_unicas = sorted(set(paginas))
-                            paginas_str = ', '.join(map(str, paginas_unicas))
+                            paginas_str = ", ".join(map(str, paginas_unicas))
                             st.write(f"- {numero} (Página(s): {paginas_str})")
                     else:
-                        st.write("Nenhuma numeração encontrada.")
-                elif arquivo.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                        st.write("Nenhuma numeração única encontrada.")
+                elif (
+                    arquivo.type
+                    == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                ):
                     texto = extrair_texto_docx(arquivo)
                     resultados = buscar_padroes(texto)
                     if resultados:
@@ -84,6 +97,7 @@ def main():
                     continue
     else:
         st.warning("Por favor, faça o login para continuar.")
+
 
 if __name__ == "__main__":
     main()
