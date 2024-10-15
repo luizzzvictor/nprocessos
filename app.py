@@ -56,7 +56,7 @@ def main():
 
         with tab_n_processos:
             arquivos = st.file_uploader(
-                "Faça upload de PDFs ou DOCXs",
+                "Faça upload de PDFs ou DOCXs para checar a menção a processos judiciais",
                 type=["pdf", "docx"],
                 accept_multiple_files=True,
             )
