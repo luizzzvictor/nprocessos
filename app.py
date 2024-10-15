@@ -40,7 +40,7 @@ def buscar_padroes(texto):
     return resultados_unicos
 
 def main():
-    st.title("Verificador de Numerações em Documentos")
+    st.title("UMFtools")
 
     autenticar()
 
